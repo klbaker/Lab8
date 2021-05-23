@@ -1,27 +1,17 @@
-import { pushToHistory } from "../scripts/router";
-
 /**
  * @jest-environment jsdom
  */
+
+ import { pushToHistory } from "../scripts/router";
+
 describe("push to history", () => {
-    test("settings", () => {
-        let expected = history.length + 1;
-        let updated = pushToHistory("settings", 0);
-        expect(updated.length).toBe(expected);
-        expect(updated.state.page).toBe('settings');
+    test("length of history stack", () => {
+        expect(pushToHistory('entry', 3).length).toBe(2);
+        expect(pushToHistory('default', 0).length).toBe(3);
     });
 
-    test("entry", () => {
-        let expected = history.length + 1;
-        let updated = pushToHistory("entry", 2);
-        expect(updated.length).toBe(expected);
-        expect(updated.state.page).toBe('entry2');
-    });
-
-    test("defaul", () => {
-        let expected = history
-        let updated = pushToHistory("other", 0);
-        expect(updated.length).toBe(expected.length);
-        expect(updated.state.page).toBe();
+    test("current state object", () => {
+        expect(pushToHistory("settings", 0).state.page).toBe("settings");
+        expect(pushToHistory("entry", 3).state.page).toBe("entry3")
     });
 });

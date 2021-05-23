@@ -1,6 +1,7 @@
 describe('Basic user flow for SPA ', () => {
   beforeAll(async () => {
     await page.goto('http://127.0.0.1:5500');
+    page.waitForNavigation()
     await page.waitForTimeout(500);
   });
 
@@ -113,7 +114,7 @@ describe('Basic user flow for SPA ', () => {
   });
 
   // define and implement test12: When the user if on the homepage, the header title should be “Journal Entries”
-  it('Test12: When the user if on the homepage, the header title should be Journal Entries', async() => {
+  it('Test12: When the user is on the homepage, the header title should be Journal Entries', async() => {
     const header = await page.$eval('header > h1', (entry) => {
       return entry.innerHTML;
     });
@@ -131,13 +132,13 @@ describe('Basic user flow for SPA ', () => {
   it('Test14: Verify the url is correct when clicking on the second entry', async() => {
     const entries = await page.$$('journal-entry');
     await entries[1].click();
-    const url = await page.url();
-    expect(url).toBe("http://127.0.0.1:5500/#entry2");
+    const url = await page.evaluate(() => window.location.href);
+    expect(url).toContain('/#entry2');
   });
 
   // define and implement test15: Verify the title is current when clicking on the second entry
   it('Test15: Verify the title is current when clicking on the second entry', async() => {
-    const header = await page.$eval('journal-entry', (entry) => {
+    const header = await page.$eval('h1', (entry) => {
       return entry.innerHTML;
     });
 
@@ -145,14 +146,58 @@ describe('Basic user flow for SPA ', () => {
   });
 
   // define and implement test16: Verify the entry page contents is correct when clicking on the second entry
+  it('Test16: Verify the entry page contents are correct when clicking on the second entry', async() => {
+    const exp = {
+      title: "Run, Forrest! Run!",
+      date: "4/26/2021",
+      content:
+        "Mama always said life was like a box of chocolates. You never know what you're gonna get.",
+      image: {
+        src: "https://s.abcnews.com/images/Entertainment/HT_forrest_gump_ml_140219_4x3_992.jpg",
+        alt: "forrest running",
+      },
+    };
+    const entry = await page.$eval('entry-page', e => e.entry);
 
+    expect(entry.title).toBe(exp.title);
+    expect(entry.date).toBe(exp.date);
+    expect(entry.content).toBe(exp.content);
+    expect(entry.image.src).toBe(exp.image.src);
+    expect(entry.image.alt).toBe(exp.image.alt);
+  });
 
   // create your own test 17
+  it('Test17: After going back to the home page the settings button updates url', async() => {
+    await page.goBack();
+    await page.click('img');
+    const url = await page.url();
+
+    expect(url).toBe("http://127.0.0.1:5500/#settings");
+  });
 
   // create your own test 18
+  it('Test18: Clicking the back button, the header should be Journal Entries', async() => {
+    await page.goBack();
+    const header = await page.$eval('header > h1', (entry) => {
+      return entry.innerHTML;
+    });
+
+    expect(header).toBe("Journal Entries")
+  });
 
   // create your own test 19
+  it('Test19: The home page should still have 10 pages', async() => {
+    const numEntries = await page.$$eval('journal-entry', (entries) => {
+      return entries.length;
+    });
+    expect(numEntries).toBe(10);
+  });
 
   // create your own test 20
-  
+  it('Test19: Verify the url is correct when clicking on the third entry', async() => {
+    const entries = await page.$$('journal-entry');
+    await entries[2].click();
+    const url = await page.evaluate(() => window.location.href);
+    expect(url).toContain('/#entry3');
+  });
 });
